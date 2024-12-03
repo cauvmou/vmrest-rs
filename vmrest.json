@@ -3021,7 +3021,7 @@
       "properties": {
         "IP": {
           "type": "string",
-          "dscription":"IP that will be assiged to given Mac"
+          "description":"IP that will be assiged to given Mac"
         }
       }
     },
