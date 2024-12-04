@@ -172,12 +172,9 @@ impl<'c> VMRestContext<'c> {
             .await
     }
 
-    pub async fn get_vm_ip(
-        &self,
-        id: &str,
-        vm_password: Option<&str>,
-    ) -> Result<String, Error> {
-        let VMIPAddress {ip} = self.make_request(reqwest::Method::GET, &["vms", id, "ip"], None, vm_password)
+    pub async fn get_vm_ip(&self, id: &str, vm_password: Option<&str>) -> Result<String, Error> {
+        let VMIPAddress { ip } = self
+            .make_request(reqwest::Method::GET, &["vms", id, "ip"], None, vm_password)
             .await?;
         Ok(ip)
     }
@@ -187,8 +184,13 @@ impl<'c> VMRestContext<'c> {
         id: &str,
         vm_password: Option<&str>,
     ) -> Result<NicIpStackAll, Error> {
-        self.make_request(reqwest::Method::GET, &["vms", id, "nicips"], None, vm_password)
-            .await
+        self.make_request(
+            reqwest::Method::GET,
+            &["vms", id, "nicips"],
+            None,
+            vm_password,
+        )
+        .await
     }
 
     pub async fn get_vmnets(&self) -> Result<Networks, Error> {
@@ -223,8 +225,13 @@ impl<'c> VMRestContext<'c> {
         parameter: &NICDeviceParameter,
         vm_password: Option<&str>,
     ) -> Result<NICDevices, Error> {
-        self.make_request(reqwest::Method::GET, &["vms", id, "nic", index], Some(&serde_json::to_string(parameter)?), vm_password)
-            .await
+        self.make_request(
+            reqwest::Method::GET,
+            &["vms", id, "nic", index],
+            Some(&serde_json::to_string(parameter)?),
+            vm_password,
+        )
+        .await
     }
 
     pub async fn set_vmnet_mactoip(
@@ -369,8 +376,13 @@ impl<'c> VMRestContext<'c> {
         parameter: &NICDeviceParameter,
         vm_password: Option<&str>,
     ) -> Result<NICDevice, Error> {
-        self.make_request(reqwest::Method::POST, &["vms", id, "nic"], Some(&serde_json::to_string(&parameter)?), vm_password)
-            .await
+        self.make_request(
+            reqwest::Method::POST,
+            &["vms", id, "nic"],
+            Some(&serde_json::to_string(&parameter)?),
+            vm_password,
+        )
+        .await
     }
 
     pub async fn delete_vm_nic(
@@ -379,8 +391,13 @@ impl<'c> VMRestContext<'c> {
         index: &str,
         vm_password: Option<&str>,
     ) -> Result<NICDevice, Error> {
-        self.make_request(reqwest::Method::DELETE, &["vms", id, "nic", index], None, vm_password)
-            .await
+        self.make_request(
+            reqwest::Method::DELETE,
+            &["vms", id, "nic", index],
+            None,
+            vm_password,
+        )
+        .await
     }
 
     pub async fn delete_vm(&self, id: &str, vm_password: Option<&str>) -> Result<(), Error> {
