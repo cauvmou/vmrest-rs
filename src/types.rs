@@ -326,8 +326,8 @@ pub struct Portforwards {
 pub struct PortforwardParameter {
     #[serde(rename = "guestIp")]
     pub guest_ip: String,
-    #[serde(rename = "guestPort")]
-    pub guest_port: Port,
+    // #[serde(rename = "guestPort")]
+    // pub guest_port: Port,
     #[serde_as(as = "NoneAsEmptyString")]
     pub desc: Option<String>,
 }

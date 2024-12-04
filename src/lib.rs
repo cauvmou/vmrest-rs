@@ -8,6 +8,30 @@ use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 pub use types::*;
 
+#[derive(Debug, Copy, Clone)]
+pub enum PortforwardingProtocol {
+    TCP,
+    UDP,
+}
+
+impl Into<String> for PortforwardingProtocol {
+    fn into(self) -> String {
+        match self {
+            PortforwardingProtocol::TCP => "tcp".to_owned(),
+            PortforwardingProtocol::UDP => "udp".to_owned(),
+        }
+    }
+}
+
+impl<'a> Into<&'a str> for PortforwardingProtocol {
+    fn into(self) -> &'a str {
+        match self {
+            PortforwardingProtocol::TCP => "tcp",
+            PortforwardingProtocol::UDP => "udp",
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct VMRestContext<'c> {
     username: &'c str,
@@ -144,6 +168,69 @@ impl<'c> VMRestContext<'c> {
             .await
     }
 
+    pub async fn get_vmnet_portforwarding(&self, network: &str) -> Result<Portforwards, Error> {
+        self.make_request(
+            reqwest::Method::GET,
+            &["vmnet", network, "portforward"],
+            None,
+            None,
+        )
+        .await
+    }
+
+    pub async fn get_vmnet_mactoip(&self, network: &str) -> Result<MACToIPs, Error> {
+        self.make_request(
+            reqwest::Method::GET,
+            &["vmnet", network, "mactoip"],
+            None,
+            None,
+        )
+        .await
+    }
+
+    pub async fn set_vmnet_mactoip(
+        &self,
+        network: &str,
+        mac: &str,
+        ip: &str,
+    ) -> Result<MACToIPs, Error> {
+        self.make_request(
+            reqwest::Method::PUT,
+            &["vmnet", network, "mactoip", mac],
+            Some(&serde_json::to_string(&MacToIPParameter {
+                ip: ip.to_string(),
+            })?),
+            None,
+        )
+        .await
+    }
+
+    pub async fn set_vmnet_portforwarding(
+        &self,
+        network: &str,
+        protocol: PortforwardingProtocol,
+        port: u16,
+        guest_ip: &str,
+        description: Option<String>,
+    ) -> Result<MACToIPs, Error> {
+        self.make_request(
+            reqwest::Method::PUT,
+            &[
+                "vmnet",
+                network,
+                "portforward",
+                protocol.into(),
+                port.to_string().as_str(),
+            ],
+            Some(&serde_json::to_string(&PortforwardParameter {
+                guest_ip: guest_ip.to_string(),
+                desc: description,
+            })?),
+            None,
+        )
+        .await
+    }
+
     pub async fn set_vm_settings(
         &self,
         id: &str,
@@ -228,12 +315,38 @@ impl<'c> VMRestContext<'c> {
     }
 
     pub async fn create_vmnet(&self, parameter: CreateVmnetParameter) -> Result<Network, Error> {
-        self.make_request(reqwest::Method::POST, &["vmnets"], Some(&serde_json::to_string(&parameter)?), None)
-            .await
+        self.make_request(
+            reqwest::Method::POST,
+            &["vmnets"],
+            Some(&serde_json::to_string(&parameter)?),
+            None,
+        )
+        .await
     }
 
     pub async fn delete_vm(&self, id: &str, vm_password: Option<&str>) -> Result<(), Error> {
         self.make_request(reqwest::Method::DELETE, &["vms", id], None, vm_password)
             .await
+    }
+
+    pub async fn delete_vmnet_portforwarding(
+        &self,
+        network: &str,
+        protocol: PortforwardingProtocol,
+        port: u16,
+    ) -> Result<MACToIPs, Error> {
+        self.make_request(
+            reqwest::Method::PUT,
+            &[
+                "vmnet",
+                network,
+                "portforward",
+                protocol.into(),
+                port.to_string().as_str(),
+            ],
+            None,
+            None,
+        )
+        .await
     }
 }
