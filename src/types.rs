@@ -234,7 +234,7 @@ pub struct SharedFolderParameter {
 pub struct NICDevice {
     pub index: NICIndex,
     #[serde(rename = "type")]
-    pub nic_type: String,
+    pub nic_type: NICType,
     pub vmnet: String,
     #[serde(rename = "macAddress")]
     pub mac_address: String,
@@ -249,9 +249,24 @@ pub struct NICDevices {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NICDeviceParameter {
     #[serde(rename = "type")]
-    pub nic_type: String,
-    pub vmnet: String,
+    pub nic_type: NICType,
+    #[serde_as(as = "NoneAsEmptyString")]
+    pub vmnet: Option<String>,
 }
+
+#[serde_as]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+pub enum NICType {
+    #[serde(rename = "nat")]
+    Nat,
+    #[serde(rename = "hostOnly")]
+    HostOnly,
+    #[serde(rename = "bridged")]
+    Bridged,
+    #[serde(rename = "custom")]
+    Segment,
+}
+
 #[serde_as]
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CreateVmnetParameter {
@@ -429,4 +444,10 @@ pub struct VMRestAPIResponse {
     pub code: i32,
     #[serde(rename = "Message")]
     pub message: String,
+}
+
+#[serde_as]
+#[derive(Debug, Serialize, Deserialize)]
+pub(crate) struct VMIPAddress {
+    pub ip: String
 }
