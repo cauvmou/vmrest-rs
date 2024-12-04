@@ -92,7 +92,7 @@ impl<'c> VMRestContext<'c> {
         trace!("{text:?}");
         let value = serde_json::Value::from_str(&text)?;
         trace!("{value:?}");
-        if status.is_client_error() {
+        if status.is_client_error() || status.is_server_error() {
             trace!("error code: {status}");
             let error = serde_json::from_value::<VMRestAPIError>(value)
                 .inspect_err(|err| error!("{err}"))?;
@@ -360,7 +360,7 @@ impl<'c> VMRestContext<'c> {
         .await
     }
 
-    pub async fn create_vmnet(&self, parameter: CreateVmnetParameter) -> Result<Network, Error> {
+    pub async fn create_vmnet(&self, parameter: CreateVmnetParameter) -> Result<Networks, Error> {
         self.make_request(
             reqwest::Method::POST,
             &["vmnets"],
